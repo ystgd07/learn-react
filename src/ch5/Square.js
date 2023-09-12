@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Square({ value, onSquareClick }) {
   //   const [value, setValue] = useState(null);
@@ -8,9 +8,17 @@ export default function Square({ value, onSquareClick }) {
   //     setValue("X");
   //   }
 
+  const [defaultContext, setDefaultContext] = useState("");
+
+  useEffect(() => {
+    console.log("use Effect!!");
+    setDefaultContext("hi");
+  }, [value]);
+
   return (
     <button className='square' onClick={onSquareClick}>
       {value}
+      {defaultContext}
     </button>
   );
 }
