@@ -1,10 +1,12 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
 name: Deploy to ECR
 
 on:
  
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   
@@ -17,14 +19,27 @@ jobs:
     steps:
 
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+    
+    - name: Check Node v            # Node v 확인
+      run: node -v
+      
+    - name: Use node.js
+      uses: actions/setup-node@v3
+      with: 
+       node-version: 18
+      
+    - name: Install dependencies and Build
+      run: |
+       npm ci
+       npm run build
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-south-1
+        aws-region: ap-northeast-2
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -34,7 +49,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: docker_nodejs_demo
-        IMAGE_TAG: nodejs_demo_image
+        IMAGE_TAG: latest
       run: |
-        docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REPOSITORY:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
